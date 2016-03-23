@@ -1,0 +1,29 @@
+#a cdk-2/cyclinE
+a   c   -1
+a	f	-1
+a	g	1
+#b cki-1
+b	b	-1
+b	e	-1
+b   a   -1
+#c cdc-14/fzy-1
+c	b	1
+c	d	1
+c	e   -1
+#d fzr-1
+d   e   -1
+d   d   -1
+d   b   1
+#e cdk-1/cyclinB
+e   c   1
+#f lin-35/efl-1/dpl-1
+f   a   -1
+f   e   1
+#g cul-1/lin-23
+g   f   1
+g   g   -1
+g   a   -1
+g   h   -1
+#h cdc-25.1
+h   a   1
+h   e   1

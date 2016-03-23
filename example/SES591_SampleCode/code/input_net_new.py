@@ -9,6 +9,7 @@ import os
 import sys
 import numpy as np
 import networkx as nx
+import re
 
 
 ################# BEGIN: read_network_from_file(EDGE_FILE, NODE_FILE) ########################
@@ -27,7 +28,8 @@ def read_network_from_file(EDGE_FILE, NODE_FILE):
 
     #### read node list with its threshold from NODE_FILE
     for line in open(NODE_FILE, 'r').readlines():
-        items = [x.strip() for x in line.rstrip().split('\t')]
+        items = [x.strip() for x in re.split('\s+', line.rstrip())]
+        # items = [x.strip() for x in line.rstrip().split('\t')]
         if line[0] == '#' or line=='':
             continue
         net.add_node(items[0], threshold=float(items[1]))
@@ -46,7 +48,8 @@ def build_nodes_list(NODE_FILE):
     '''
     nodes_list = []
     for line in open(NODE_FILE, 'r').readlines():
-        items = [x.strip() for x in line.rstrip().split('\t')]
+        items = [x.strip() for x in re.split('\s+', line.rstrip())]
+        # items = [x.strip() for x in line.rstrip().split('\t')]
         if line[0] == '#' or line=='':
             continue
         nodes_list.append(items[0])
@@ -56,8 +59,8 @@ def build_nodes_list(NODE_FILE):
 
 def main():
     print "input_net module is the main code."
-    EDGE_FILE = '../data/elegans/elegans-net-edges.dat'
-    NODE_FILE = '../data/elegans/elegans-net-nodes.dat'
+    EDGE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-edges-new-names.dat'
+    NODE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-nodes-new-names.dat'
 
     net = read_network_from_file(EDGE_FILE, NODE_FILE)
     nodes_list = build_nodes_list(NODE_FILE)
