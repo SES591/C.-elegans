@@ -23,12 +23,12 @@ def build_historyList(aList, historyLength, Nbr_States=2):
     '''
     Description
         : To generate a list of decimal states for k-previous states of a node with a given list of dynamical states of the nodes
-     
+
     Arguments
         : 1. aList = a given list of dynamical states of a node
           2. historyLength = the number of previous states converted to a decimal state
           3. Nbr_States = the number of possible states for each node (2 by default)
-          
+
     Return
         : a list of decimal states for k-previous states of a node
     '''
@@ -38,7 +38,7 @@ def build_historyList(aList, historyLength, Nbr_States=2):
     #print "Unit", historyUnit
     aList[:historyLength] = []
     #print "aList - Unit", aList
-    
+
     historyState = 0
     for s in range(historyLength):
         historyState += historyUnit[s] * np.power(Nbr_States, s)
@@ -50,7 +50,7 @@ def build_historyList(aList, historyLength, Nbr_States=2):
         historyState = historyState / Nbr_States + x * np.power(Nbr_States, historyLength - 1)
         historyList.append(historyState)
         #print x, historyState
-        
+
     return historyList
 ################# end : build_historyList ########################
 
@@ -61,7 +61,7 @@ def compute_AI(timeSeriesNode, historyLength, Nbr_Initial_States, Nbr_States=2):
     count_currState_hiState = defaultdict(int)
     count_hiState = defaultdict(int)
     count_currState = defaultdict(int)
-    
+
     for si in range(Nbr_Initial_States):
         aList = list(timeSeriesNode[si])
         historyList = build_historyList(aList, historyLength, Nbr_States) # aList becomes aList[historyLength:] after historyList function
@@ -81,7 +81,7 @@ def compute_AI(timeSeriesNode, historyLength, Nbr_Initial_States, Nbr_States=2):
         historyList = build_historyList(aList, historyLength, Nbr_States) # aList becomes aList[historyLength:] after historyList function
         #print "after counting aList", aList
         #print "after counting history", historyList
-        
+
         sampleLength = len(aList) * Nbr_Initial_States
         for s in range(len(aList)):
             prob_currState_hiState = float(count_currState_hiState[(aList[s], historyList[s])]) / float(sampleLength)
@@ -98,13 +98,13 @@ def compute_AI(timeSeriesNode, historyLength, Nbr_Initial_States, Nbr_States=2):
 
 ################## begin : compute_TE ########################
 def compute_TE(timeSeriesNodeA, timeSeriesNodeB, historyLength, Nbr_Initial_States, Nbr_States=2):
-    
+
     #*** declare dic for distribution to compute Transfer Entropy ***#
     count_tarCurrState_tarHiState_sourPrevState = defaultdict(int)
     count_tarCurrState_tarHiState = defaultdict(int)
     count_tarHiState_sourPrevState = defaultdict(int)
     count_tarHiState = defaultdict(int)
-    
+
     for si in range(Nbr_Initial_States):
         sourList = list(timeSeriesNodeA[si])
         tarList = list(timeSeriesNodeB[si])
@@ -149,4 +149,3 @@ def compute_TE(timeSeriesNodeA, timeSeriesNodeB, historyLength, Nbr_Initial_Stat
 #tarList = [1,1,1,0,1,1,0,1,0,0,1,1,0,0,1,1,1,0,1,1,0,1]
 #sourList = [1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,0,1,1,0,0,1]
 #print comTE(sourList, tarList, 1)
-

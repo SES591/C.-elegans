@@ -9,7 +9,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-import input_net_new as inet
+import input_net_eleg as inet
 import updating_rule_new as ur
 
 
@@ -36,8 +36,39 @@ def binary_to_decimal(nodes_list, biStates, Nbr_States=2):  # more left in the n
 ################# END: binary_to_decimal(nodes_list, biStates, Nbr_States=2) ########################
 
 
+################# BEGIN: biological_sequence(net, nodes_list, Nbr_States=2) ########################
+def biological_sequence(net, nodes_list, bio_initStates, fileName, Nbr_States=2):
+    bioSeq = []
+    currBiStates = bio_initStates
+    finished = False
+    while(not finished):
+        oneDiff = 0
+        prevBiStates = currBiStates.copy()
+        bioSeq.append(prevBiStates)
+        currBiStates = ur.sigmoid_updating(net, prevBiStates)
+        for u in nodes_list:
+            if abs(prevBiStates[u] - currBiStates[u]) > 0:
+                oneDiff = 1
+                break
+        finished = (oneDiff < 1)
+
+    OUTPUT_FILE  = open(fileName, 'w')
+    OUTPUT_FILE.write('time step')
+    for u in nodes_list:
+        OUTPUT_FILE.write('\t%s'%(u))
+    OUTPUT_FILE.write('\n')
+
+    for i in range(len(bioSeq)):
+        OUTPUT_FILE.write('%d'%i)
+        for u in nodes_list:
+            OUTPUT_FILE.write('\t%d'%(bioSeq[i][u]))
+        OUTPUT_FILE.write('\n')
+    #return bioSeq
+################# END: biological_sequence(net, nodes_list, Nbr_States=2) ########################
+
+
 ################# BEGIN: ensemble_time_series(net, nodes_list, Nbr_States=2, MAX_TimeStep=20, Transition_Step=0) ########################
-def ensemble_time_series(net, nodes_list, Nbr_States=2, MAX_TimeStep=20):
+def time_series(net, nodes_list, Nbr_Initial_States, Nbr_States, MAX_TimeStep=20):
 
     '''
         Arguments:
@@ -49,18 +80,18 @@ def ensemble_time_series(net, nodes_list, Nbr_States=2, MAX_TimeStep=20):
         1. timeSeriesData
         '''
 
-    Nbr_Nodes = len(net.nodes())
-    Nbr_All_Initial_States = np.power(Nbr_States, Nbr_Nodes)
+    #Nbr_Nodes = len(net.nodes())
+    #Nbr_All_Initial_States = np.power(Nbr_States, Nbr_Nodes)
 
     timeSeriesData = {}
     for n in net.nodes():
         timeSeriesData[n] = {}
-        for initState in range(0, Nbr_All_Initial_States):
+        for initState in range(Nbr_Initial_States):
             timeSeriesData[n][initState] = []
 
-    for initDecState in range(0, Nbr_All_Initial_States):
+    for initDecState in range(Nbr_Initial_States):
         currBiState = decimal_to_binary(nodes_list, initDecState, Nbr_States)
-        for step in range(0, MAX_TimeStep):
+        for step in range(MAX_TimeStep):
             prevBiState = currBiState.copy()
             for n in nodes_list:
                 timeSeriesData[n][initDecState].append(prevBiState[n])
@@ -85,7 +116,7 @@ def net_state_transition(net, nodes_list, Nbr_States=2):
     Nbr_All_Initial_States = np.power(Nbr_States, Nbr_Nodes)
 
     decStateTransMap = nx.DiGraph()
-    for prevDecState in range(0, Nbr_All_Initial_States):
+    for prevDecState in range(Nbr_All_Initial_States):
         prevBiState = decimal_to_binary(nodes_list, prevDecState, Nbr_States)
         currBiState = ur.sigmoid_updating(net, prevBiState)
         currDecState = binary_to_decimal(nodes_list, currBiState, Nbr_States)
@@ -118,41 +149,50 @@ def find_attractor(decStateTransMap):
 ################# END: attractor_analysis(decStateTransMap) ########################
 
 def main():
-    print "time_evol module is the main code."
-    EDGE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-edges-new-names.dat'
-    NODE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-nodes-new-names.dat'
+    '''
+    print "time_evol_eleg module is the main code."
+    ## to import a network of 3-node example
+    EDGE_FILE = '../data/example/example-net-edges.dat'
+    NODE_FILE = '../data/example/example-net-nodes.dat'
 
     net = inet.read_network_from_file(EDGE_FILE, NODE_FILE)
     nodes_list = inet.build_nodes_list(NODE_FILE)
 
-    timeSeriesData = ensemble_time_series(net, nodes_list, 2, 8)#, Nbr_States=2, MAX_TimeStep=20)
 
-
-#    initState = 1
-#    biStates = decimal_to_binary(nodes_list, initState)
-    biStates = {'cdk-2/cyclinE':1, 'cki-1':1, 'cdc-14/fzy-1':1, 'fzr-1':1, 'cdk-1/cyclinB':0, 'lin-35/efl-1/dpl-1':1, 'cul-1/lin-23':0, 'cdc-25.1':0}
-    dec_init = binary_to_decimal(nodes_list, biStates, Nbr_States=2)
+    ## to obtain time series data for all possible initial conditions for 3-node example network
+    timeSeriesData = ensemble_time_series(net, nodes_list, 2, 10)#, Nbr_States=2, MAX_TimeStep=20)
+    initState = 1
+    biStates = decimal_to_binary(nodes_list, initState)
     print 'initial state', biStates
-    print 'cdk-2/cyclinE', timeSeriesData['cdk-2/cyclinE'][dec_init]
-    print 'cki-1', timeSeriesData['cki-1'][dec_init]
-    print 'cdc-14/fzy-1', timeSeriesData['cdc-14/fzy-1'][dec_init]
-    print 'fzr-1', timeSeriesData['fzr-1'][dec_init]
-    print 'cdk-1/cyclinB', timeSeriesData['cdk-1/cyclinB'][dec_init]
-    print 'lin-35/efl-1/dpl-1', timeSeriesData['lin-35/efl-1/dpl-1'][dec_init]
-    print 'cul-1/lin-23', timeSeriesData['cul-1/lin-23'][dec_init]
-    print 'cdc-25.1', timeSeriesData['cdc-25.1'][dec_init]
+
+    ## to print time series data for each node: a, b, c starting particualer decimal inital condition 1
+    print 'a', timeSeriesData['a'][1]
+    print 'b', timeSeriesData['b'][1]
+    print 'c', timeSeriesData['c'][1]
 
 
+    ## to obtain and visulaize transition map in the network state space
     decStateTransMap = net_state_transition(net, nodes_list)
-    # nx.write_graphml(decStateTransMap, '/Users/Kelle Dhein/C.-elegans/ElegansGraph.graphml')
+    nx.draw(decStateTransMap)
     plt.show()
 
-
+    ## to find fixed point attractors and limited cycle attractors with given transition map.
     attractors = find_attractor(decStateTransMap)
     print attractors
+    '''
 
+    ## to obtain biological sequence for the C. Elegans Early Embryonic Cell-Cycle Net starting from biological inital state
+    EDGE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-edges-new-names.dat'
+    NODE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-nodes-new-names.dat'
+    BIO_INIT_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-bioSeq-initial.txt'
 
+    net = inet.read_network_from_file(EDGE_FILE, NODE_FILE)
+    nodes_list = inet.build_nodes_list(NODE_FILE)
+    bio_initStates = inet.read_init_from_file(BIO_INIT_FILE)
 
+    # for outputfile write data path for where you want results stored
+    outputFile = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-results-bioSeq.txt'
+    bioSeq = biological_sequence(net, nodes_list, bio_initStates, outputFile)
 
 
 if __name__=='__main__':

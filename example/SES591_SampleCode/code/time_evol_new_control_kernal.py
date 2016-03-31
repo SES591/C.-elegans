@@ -14,6 +14,8 @@ import updating_rule_new as ur
 
 
 ################# BEGIN: decimal_to_binary(nodes_list, decState, Nbr_States=2) ########################
+#biStates, what this returns is a dictionary
+#returns keys are nodes and values are 0 or 1
 def decimal_to_binary(nodes_list, decState, Nbr_States=2): # more left in the nodes list means higher order of 2 in binary
     biStates = {}
     x = len(nodes_list) -1
@@ -71,14 +73,14 @@ def ensemble_time_series(net, nodes_list, Nbr_States=2, MAX_TimeStep=20):
 
 
 ################# BEGIN: net_state_transition_map(net, nodes_list, Nbr_States=2) ########################
-def net_state_transition(net, nodes_list, Nbr_States=2):
+def net_state_transition(net, nodes_list, Nbr_States=2, fixedNodes=[]):
 
     '''
     Arguments:
-               1. net
-               2. Nbr_States
+               1. net (network topology)
+               2. Nbr_States (int)
     Return:
-               1. decStateTransMap
+               1. decStateTransMap (networkx Digraph)
     '''
 
     Nbr_Nodes = len(net.nodes())
@@ -87,10 +89,10 @@ def net_state_transition(net, nodes_list, Nbr_States=2):
     decStateTransMap = nx.DiGraph()
     for prevDecState in range(0, Nbr_All_Initial_States):
         prevBiState = decimal_to_binary(nodes_list, prevDecState, Nbr_States)
-        currBiState = ur.sigmoid_updating(net, prevBiState)
+        currBiState = ur.sigmoid_updating(net, prevBiState, fixedNodes)
         currDecState = binary_to_decimal(nodes_list, currBiState, Nbr_States)
         decStateTransMap.add_edge(prevDecState, currDecState)
-    return decStateTransMap
+    return decStateTransMap #attractor landscape
 ################# END: net_state_transition_map(net, nodes_list, Nbr_States=2) ########################
 
 
@@ -131,6 +133,7 @@ def main():
 #    initState = 1
 #    biStates = decimal_to_binary(nodes_list, initState)
     biStates = {'cdk-2/cyclinE':1, 'cki-1':1, 'cdc-14/fzy-1':1, 'fzr-1':1, 'cdk-1/cyclinB':0, 'lin-35/efl-1/dpl-1':1, 'cul-1/lin-23':0, 'cdc-25.1':0}
+#    generates hash for original state of the network
     dec_init = binary_to_decimal(nodes_list, biStates, Nbr_States=2)
     print 'initial state', biStates
     print 'cdk-2/cyclinE', timeSeriesData['cdk-2/cyclinE'][dec_init]
@@ -143,8 +146,8 @@ def main():
     print 'cdc-25.1', timeSeriesData['cdc-25.1'][dec_init]
 
 
-    decStateTransMap = net_state_transition(net, nodes_list)
-    # nx.write_graphml(decStateTransMap, '/Users/Kelle Dhein/C.-elegans/ElegansGraph.graphml')
+    decStateTransMap = net_state_transition(net, nodes_list, fixedNodes=fixedNodes)
+    nx.write_graphml(decStateTransMap, '/Users/Kelle Dhein/C.-elegans/ElegansGraph.graphml') # Saves network as .graphml file
     plt.show()
 
 

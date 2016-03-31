@@ -15,9 +15,9 @@ from collections import defaultdict
 #from math import log
 #import itertools
 
-import input_net_new as inet
+import input_net_eleg as inet
 import updating_rule_new as ur
-import time_evol_new as ev
+import time_evol_eleg as ev
 
 
 
@@ -38,7 +38,7 @@ def read_network_from_file(EDGE_FILE, NODE_FILE):
     #### read node list with its threshold from NODE_FILE
     for line in open(NODE_FILE, 'r').readlines():
         items = [x.strip() for x in re.split('\s+', line.rstrip())]
-        # items = [x.strip() for x in line.rstrip().split('\t')]
+        # items = [x.strip() for x in line.rstrip().split('\t')] #H's tab style
         if line[0] == '#' or line=='':
             continue
         net.add_node(items[0], threshold=float(items[1]))
@@ -228,12 +228,12 @@ def com_TE_over_trajectory(timeSeriesA, timeSeriesB, historyLength):
 ################## end : comAI ########################
 
 def main():
-    print "info_dyn module is the main code."
+    print "info_dyn_eleg module is the main code."
     EDGE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-edges-new-names.dat'
     NODE_FILE = 'C:\Users\Kelle Dhein\C.-elegans\example\SES591_SampleCode\data\elegans\elegans-net-nodes-new-names.dat'
 
     net = read_network_from_file(EDGE_FILE, NODE_FILE)
-    nodes_list = build_nodes_list(NODE_FILE)
+    nodes_list = inet.build_nodes_list(NODE_FILE)
 
 
 
